@@ -1,0 +1,38 @@
+name: "Delete feature branch artifacts upon branch deletion"
+
+on: 
+  delete:
+    branches-ignore:
+      - main
+      - staging
+ 
+env:
+  ATLAS_APP_ID_DEV_NAME_PREFIX: cicd-demo
+   
+jobs:    
+  deleteArtifacts:
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: "Install the Atlas App Services (Realm) CLI & authenticate"
+      run: |
+           npm install -g mongodb-realm-cli
+           realm-cli login --api-key="${{ secrets.ATLAS_API_PUBLIC_KEY }}" --private-api-key="${{ secrets.ATLAS_API_PRIVATE_KEY }}" --realm-url https://realm.mongodb.com --atlas-url https://cloud.mongodb.com
+
+    - name: "Store the name of the branch"
+      run: | 
+           ref=$(echo ${{ github.event.ref }})
+           branch=$(echo "${ref##*/}")
+           echo "FEATURE_BRANCH=$ATLAS_APP_ID_DEV_NAME_PREFIX-$branch" >> $GITHUB_ENV
+
+    - name: "Delete the Atlas app associated with the branch"
+      run: | 
+           output=$(realm-cli apps ls | grep ${{ env.FEATURE_BRANCH }}- | sed -e 's/ //g' | sed -e 's/(.*)//')
+           if [[ $output == "" || $output == *null ]]; then
+              echo "No Atlas app found for this branch"
+           else
+              app_id=$(echo $output)
+              echo "Atlas app was found for this branch: $app_id. It will now be deleted"
+              realm-cli app delete --app $app_id
+           fi
