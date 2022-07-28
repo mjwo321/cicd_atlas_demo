@@ -12,22 +12,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    
     - name: "Install the Atlas App Services (Realm) CLI & authenticate"
       run: |
            npm install -g mongodb-realm-cli
            realm-cli login --api-key="${{ secrets.ATLAS_API_PUBLIC_KEY }}" --private-api-key="${{ secrets.ATLAS_API_PRIVATE_KEY }}" --realm-url https://realm.mongodb.com --atlas-url https://cloud.mongodb.com
+    
     - name: "Is this a push to the Main branch?"
       if: ${{ github.ref == 'refs/heads/main' }}
       run: |
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_PROD" >> $GITHUB_ENV
            cd atlas-app
            sed -i txt 's/"environment": ".*"/"environment": "production"/' realm_config.json
+    
     - name: "Is this a push to the Staging branch?"
       if: ${{ github.ref == 'refs/heads/staging' }}
       run: |
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_QA" >> $GITHUB_ENV
            cd atlas-app
            sed -i txt 's/"environment": ".*"/"environment": "qa"/' realm_config.json
+    
     - name: "Is this a push to a feature branch?"
       if: ${{ !env.ATLAS_APP_ID && github.event_name == 'push' }}
       run: | 
@@ -44,11 +48,13 @@ jobs:
               app_id=$(echo $output)
               echo "ATLAS_APP_ID=$app_id" >> $GITHUB_ENV
            fi
+    
     - name: "Push updated copy of the Atlas app for existing apps (Main, Staging, or Feature branches)"
       if: ${{ env.ATLAS_APP_ID }}
       run: | 
            cd atlas-app
            realm-cli push --remote="${{ env.ATLAS_APP_ID }}" -y
+    
     - name: "Create a new Atlas app for feature branches where the app does not yet exist"
       if: ${{ env.ATLAS_APP_ID == null && github.event_name == 'push' }}
       run: | 
