@@ -23,14 +23,14 @@ jobs:
       run: |
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_PROD" >> $GITHUB_ENV
            cd atlas-app
-           sed -i txt 's/"environment": ".*"/"environment": "production"/' realm_config.json
+           sed -i 's/"environment": ".*"/"environment": "production"/' realm_config.json
     
     - name: "Is this a push to the Staging branch?"
       if: ${{ github.ref == 'refs/heads/staging' }}
       run: |
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_QA" >> $GITHUB_ENV
            cd atlas-app
-           sed -i txt 's/"environment": ".*"/"environment": "qa"/' realm_config.json
+           sed -i 's/"environment": ".*"/"environment": "qa"/' realm_config.json
     
     - name: "Is this a push to a feature branch?"
       if: ${{ !env.ATLAS_APP_ID && github.event_name == 'push' }}
@@ -59,7 +59,7 @@ jobs:
       if: ${{ env.ATLAS_APP_ID == null && github.event_name == 'push' }}
       run: | 
            cd atlas-app
-           sed -i txt 's/"name": ".*"/"name": "${{ env.FEATURE_BRANCH }}"/' realm_config.json
-           sed -i txt 's/"environment": ".*"/"environment": "development"/' realm_config.json
-           sed -i txt '/"app_id".*$/d' realm_config.json
+           sed -i 's/"name": ".*"/"name": "${{ env.FEATURE_BRANCH }}"/' realm_config.json
+           sed -i 's/"environment": ".*"/"environment": "development"/' realm_config.json
+           sed -i '/"app_id".*$/d' realm_config.json
            realm-cli push -y --project $ATLAS_PROJECT_ID
