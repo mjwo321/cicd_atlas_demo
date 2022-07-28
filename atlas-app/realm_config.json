@@ -1,0 +1,9 @@
+{
+    "app_id": "cicd-demo-prod-ayrvk",
+    "config_version": 20210101,
+    "name": "cicd-demo-prod",
+    "location": "DE-FF",
+    "provider_region": "aws-eu-central-1",
+    "deployment_model": "LOCAL",
+    "environment": "production"
+}
