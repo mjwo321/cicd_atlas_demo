@@ -5,7 +5,10 @@ env:
   ATLAS_PROJECT_ID: 61d3f66b516c9a03d00e09a1
   ATLAS_APP_ID_PROD: cicd-demo-prod-ayrvk
   ATLAS_APP_ID_QA: cicd-demo-qa-uzann
-  ATLAS_APP_ID_DEV_NAME_PREFIX: cicd-demo
+  ATLAS_APP_ID_DEV_PREFIX: cicd-demo
+  ATLAS_CLUSTER_PROD: demo-cluster
+  ATLAS_CLUSTER_QA: demo-cluster-qa
+  ATLAS_CLUSTER_DEV: demo-cluster-dev
   
 jobs:    
   build:
@@ -24,6 +27,7 @@ jobs:
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_PROD" >> $GITHUB_ENV
            cd atlas-app
            sed -i 's/"environment": ".*"/"environment": "production"/' realm_config.json
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_PROD"'"/' data_sources/mongodb-atlas/config.json
     
     - name: "Is this a push to the Staging branch?"
       if: ${{ github.ref == 'refs/heads/staging' }}
@@ -31,22 +35,25 @@ jobs:
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_QA" >> $GITHUB_ENV
            cd atlas-app
            sed -i 's/"environment": ".*"/"environment": "qa"/' realm_config.json
-    
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_QA"'"/' data_sources/mongodb-atlas/config.json
+           
     - name: "Is this a push to a feature branch?"
       if: ${{ !env.ATLAS_APP_ID && github.event_name == 'push' }}
       run: | 
            # Create a new environment variable to store the name of the feature branch
            ref=$(echo ${{ github.ref }})
            branch=$(echo "${ref##*/}")
-           echo "FEATURE_BRANCH=$ATLAS_APP_ID_DEV_NAME_PREFIX-$branch" >> $GITHUB_ENV
+           echo "FEATURE_BRANCH=$ATLAS_APP_ID_DEV_PREFIX-$branch" >> $GITHUB_ENV
            cd atlas-app
-           output=$(realm-cli apps ls | grep $ATLAS_APP_ID_DEV_NAME_PREFIX-$branch- | sed -e 's/ //g' | sed -e 's/(.*)//')
+           output=$(realm-cli apps ls | grep $ATLAS_APP_ID_DEV_PREFIX-$branch- | sed -e 's/ //g' | sed -e 's/(.*)//')
            if [[ $output == *null ]]; then
               echo "No Atlas app found for this branch. A new app will be pushed later in this workflow"
            else
               echo "Atlas app $output was found for this branch. Updates will be pushed to the existing app later in this workflow"
               app_id=$(echo $output)
               echo "ATLAS_APP_ID=$app_id" >> $GITHUB_ENV
+              sed -i 's/"environment": ".*"/"environment": "development"/' realm_config.json
+              sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_DEV"'"/' data_sources/mongodb-atlas/config.json
            fi
     
     - name: "Push updated copy of the Atlas app for existing apps (Main, Staging, or Feature branches)"
@@ -62,4 +69,5 @@ jobs:
            sed -i 's/"name": ".*"/"name": "${{ env.FEATURE_BRANCH }}"/' realm_config.json
            sed -i 's/"environment": ".*"/"environment": "development"/' realm_config.json
            sed -i '/"app_id".*$/d' realm_config.json
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_DEV"'"/' data_sources/mongodb-atlas/config.json
            realm-cli push -y --project $ATLAS_PROJECT_ID
