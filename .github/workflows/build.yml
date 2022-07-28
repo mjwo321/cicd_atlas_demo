@@ -27,7 +27,7 @@ jobs:
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_PROD" >> $GITHUB_ENV
            cd atlas-app
            sed -i 's/"environment": ".*"/"environment": "production"/' realm_config.json
-           sed -i 's/"clusterName": ".*"/"clusterName": "$ATLAS_CLUSTER_PROD"/' data_sources/mongodb-atlas/config.json
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_PROD"'"/' data_sources/mongodb-atlas/config.json
     
     - name: "Is this a push to the Staging branch?"
       if: ${{ github.ref == 'refs/heads/staging' }}
@@ -35,7 +35,7 @@ jobs:
            echo "ATLAS_APP_ID=$ATLAS_APP_ID_QA" >> $GITHUB_ENV
            cd atlas-app
            sed -i 's/"environment": ".*"/"environment": "qa"/' realm_config.json
-           sed -i 's/"clusterName": ".*"/"clusterName": "$ATLAS_CLUSTER_QA"/' data_sources/mongodb-atlas/config.json
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_QA"'"/' data_sources/mongodb-atlas/config.json
            
     - name: "Is this a push to a feature branch?"
       if: ${{ !env.ATLAS_APP_ID && github.event_name == 'push' }}
@@ -53,7 +53,7 @@ jobs:
               app_id=$(echo $output)
               echo "ATLAS_APP_ID=$app_id" >> $GITHUB_ENV
               sed -i 's/"environment": ".*"/"environment": "development"/' realm_config.json
-              sed -i 's/"clusterName": ".*"/"clusterName": "$ATLAS_CLUSTER_DEV"/' data_sources/mongodb-atlas/config.json
+              sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_DEV"'"/' data_sources/mongodb-atlas/config.json
            fi
     
     - name: "Push updated copy of the Atlas app for existing apps (Main, Staging, or Feature branches)"
@@ -69,5 +69,5 @@ jobs:
            sed -i 's/"name": ".*"/"name": "${{ env.FEATURE_BRANCH }}"/' realm_config.json
            sed -i 's/"environment": ".*"/"environment": "development"/' realm_config.json
            sed -i '/"app_id".*$/d' realm_config.json
-           sed -i 's/"clusterName": ".*"/"clusterName": "$ATLAS_CLUSTER_DEV"/' data_sources/mongodb-atlas/config.json
+           sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_DEV"'"/' data_sources/mongodb-atlas/config.json
            realm-cli push -y --project $ATLAS_PROJECT_ID
