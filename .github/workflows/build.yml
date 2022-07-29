@@ -71,3 +71,9 @@ jobs:
            sed -i '/"app_id".*$/d' realm_config.json
            sed -i 's/"clusterName": ".*"/"clusterName": "'"$ATLAS_CLUSTER_DEV"'"/' data_sources/mongodb-atlas/config.json
            realm-cli push -y --project $ATLAS_PROJECT_ID
+           
+    - name: "Create secrets in Atlas app"
+      run: |
+           cd atlas-app
+           realm-cli secrets delete -a "${{ env.ATLAS_APP_ID }}" -s "secret_password"
+           realm-cli secrets create -a "${{ env.ATLAS_APP_ID }}" -n "secret_password" -v "${{ secrets.ATLAS_APP_SECRET_PASSWORD }}"
