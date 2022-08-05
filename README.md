@@ -1,1 +1,1 @@
-# cicd_atlas_demo
+# Github actions demo for CI/CD with Atlas app services 
