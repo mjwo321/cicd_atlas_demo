@@ -16,6 +16,7 @@ Prerequisites:
 * An atlas app service app (PROD)
 * A copy of your app that is used for QA (if a QA version is not needed, it is also possible to remove all QA/staging deployment parts from the code)
 
+Setup:
 1. Create a new repository containing your Atlas app services app
 (we used the folder *atlas-app* in our example)
 
