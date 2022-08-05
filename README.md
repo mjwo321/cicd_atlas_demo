@@ -22,13 +22,13 @@ Prerequisites:
 2. Create the necessary secrets for GitHub Actions in your repository
 Secrets can be created under Settings > Secrets > Actions
 
-  Create Secrets for the Atlas API
+  * Create Secrets for the Atlas API
   ```
   ATLAS_API_PRIVATE_KEY
   ATLAS_API_PUBLIC_KEY
   ```
 
-  Create additional seecrets that are specific for your app (e.g. passwords or login data).
+  * Create additional seecrets that are specific for your app (e.g. passwords or login data).
   GitHub Actions is used to create development versions of your app that contain these secrets.
 
 3. Clone and modify the two files
