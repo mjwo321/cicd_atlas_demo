@@ -10,7 +10,7 @@ Contains sample code for the following processes
 * Deletion of feature branch => Delete / Clean-up of DEV app in Atlas app services
 * Creation of secrets in Atlas app services (secrets need to be maintained as GitHub Secrets)
 
-## Instructions, how to use this?
+## Instructions, how to use this example?
 
 Prerequisites:
 * An atlas app service app (PROD)
